@@ -48,18 +48,15 @@ const SearchField = styled.input`
 function App() {
   const [posts, setPosts] = React.useState([]);
   const [users, setUsers] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
 
   const [search, setSearch] = React.useState("");
   const [filteredPosts, setFilteredPosts] = React.useState([]);
 
   React.useEffect(() => {
-    setLoading(true);
     axios
       .get("https://jsonplaceholder.typicode.com/posts")
       .then((res) => {
         setPosts(res.data);
-        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
@@ -85,9 +82,6 @@ function App() {
     );
   }, [search, posts]);
 
-  if (loading) {
-    return <p>Loading posts...</p>;
-  }
   return (
     <Wrapper>
       <GlobalStyle />
