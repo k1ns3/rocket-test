@@ -1,7 +1,8 @@
 import React from "react";
+import axios from "axios";
 import styled, { createGlobalStyle } from "styled-components";
-import PostBlock from "./components/PostBlock";
 import { Posts } from "./types/Posts";
+import Post from "./components/Post";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -30,29 +31,77 @@ const Content = styled.div`
   justify-content: space-between;
 `;
 
+const SearchBlock = styled.div`
+  text-align: center;
+`;
+
+const SearchField = styled.input`
+  width: 65%;
+  margin: 0 auto;
+  max-height: 40px;
+  font-size: 1.5em;
+  border-radius: 15px;
+  padding-left: 20px;
+  opacity: 0.5;
+`;
+
 function App() {
-  const [posts, setPosts] = React.useState<Posts[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [posts, setPosts] = React.useState([]);
   const [users, setUsers] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+
+  const [search, setSearch] = React.useState("");
+  const [filteredPosts, setFilteredPosts] = React.useState([]);
 
   React.useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/posts")
-      .then((resp) => resp.json())
-      .then((data) => setPosts(data));
+    setLoading(true);
+    axios
+      .get("https://jsonplaceholder.typicode.com/posts")
+      .then((res) => {
+        setPosts(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   React.useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then((resp) => resp.json())
-      .then((data) => setUsers(data));
+    axios
+      .get("https://jsonplaceholder.typicode.com/users")
+      .then((res) => {
+        setUsers(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
+  React.useEffect(() => {
+    setFilteredPosts(
+      posts.filter((post: any) =>
+        post.body.toLowerCase().includes(search.toLowerCase())
+      )
+    );
+  }, [search, posts]);
+
+  if (loading) {
+    return <p>Loading posts...</p>;
+  }
   return (
     <Wrapper>
       <GlobalStyle />
       <Title>Rocket test</Title>
+      <SearchBlock>
+        <SearchField
+          type="text"
+          onChange={(event: any) => setSearch(event.target.value)}
+          placeholder="Search..."
+        />
+      </SearchBlock>
       <Content>
-        <PostBlock posts={posts} />
+        {filteredPosts &&
+          filteredPosts.map((post: Posts) => <Post key={post.id} {...post} />)}
       </Content>
     </Wrapper>
   );
