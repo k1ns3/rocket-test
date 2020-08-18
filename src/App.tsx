@@ -89,6 +89,11 @@ function App() {
     );
   }, [search, posts]);
 
+  // Костыльное решение, не придумал как лучше замёрджить два массива
+  const result = React.useMemo(() => {
+    merge(posts, users);
+  }, [posts, users]);
+
   function merge(posts: any, users: any) {
     if (posts.length !== 0 && users.length !== 0)
       setMergedArrays(
@@ -97,10 +102,6 @@ function App() {
         )
       );
   }
-
-  const result = React.useMemo(() => {
-    merge(posts, users);
-  }, [posts, users]);
 
   return (
     <Wrapper>
