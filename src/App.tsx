@@ -3,6 +3,7 @@ import axios from "axios";
 import styled, { createGlobalStyle } from "styled-components";
 import { Posts } from "./types/Posts";
 import Post from "./components/Post";
+import { Users } from "./types/Users";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -45,23 +46,18 @@ const SearchField = styled.input`
   opacity: 0.5;
 `;
 
+const ErrorTitle = styled(Title)`
+  color: #000;
+`;
+
 function App() {
-  const [posts, setPosts] = React.useState([]);
-  const [users, setUsers] = React.useState([]);
+  const [posts, setPosts] = React.useState<Array<Posts>>([]);
+  const [users, setUsers] = React.useState<Array<Users>>([]);
+  const [filteredPosts, setFilteredPosts] = React.useState<Array<Posts>>([]);
+  const [mergedArrays, setMergedArrays] = React.useState([]);
+  const [search, setSearch] = React.useState<String>("");
 
-  const [search, setSearch] = React.useState("");
-  const [filteredPosts, setFilteredPosts] = React.useState([]);
-
-  React.useEffect(() => {
-    axios
-      .get("https://jsonplaceholder.typicode.com/posts")
-      .then((res) => {
-        setPosts(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+  console.log(mergedArrays);
 
   React.useEffect(() => {
     axios
@@ -75,12 +71,36 @@ function App() {
   }, []);
 
   React.useEffect(() => {
+    axios
+      .get("https://jsonplaceholder.typicode.com/posts")
+      .then((res) => {
+        setPosts(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  React.useEffect(() => {
     setFilteredPosts(
-      posts.filter((post: any) =>
-        post.body.toLowerCase().includes(search.toLowerCase())
+      posts.filter((post: Posts) =>
+        post.body.toLowerCase().includes(search.toLowerCase().trim())
       )
     );
   }, [search, posts]);
+
+  function merge(posts: any, users: any) {
+    if (posts.length !== 0 && users.length !== 0)
+      setMergedArrays(
+        posts.map(
+          (post: any) => ((post.name = users[post.userId - 1].name), post)
+        )
+      );
+  }
+
+  const result = React.useMemo(() => {
+    merge(posts, users);
+  }, [posts, users]);
 
   return (
     <Wrapper>
@@ -89,13 +109,18 @@ function App() {
       <SearchBlock>
         <SearchField
           type="text"
-          onChange={(event: any) => setSearch(event.target.value)}
+          onChange={({ target: { value: inputText } }) => setSearch(inputText)}
           placeholder="Search..."
         />
       </SearchBlock>
       <Content>
-        {filteredPosts &&
-          filteredPosts.map((post: Posts) => <Post key={post.id} {...post} />)}
+        {filteredPosts.length ? (
+          filteredPosts.map((post: Posts) => (
+            <Post key={post.id} {...post} {...result} />
+          ))
+        ) : (
+          <ErrorTitle>Поста по вашему запросу не найдено</ErrorTitle>
+        )}
       </Content>
     </Wrapper>
   );

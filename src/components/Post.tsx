@@ -45,17 +45,18 @@ const PostBottom = styled.div`
   padding-top: 10%;
 `;
 
-const Post = ({ title, body, userId }: Posts) => {
+const Post = React.memo(function Post({ title, body, name }: Posts) {
+  console.log(name);
   return (
     <Block>
-      <Title>Заголовок</Title>
+      <Title>Title</Title>
       <PostTitle>{title}</PostTitle>
       <PostDescription>
         <Description>{body}</Description>
       </PostDescription>
-      <PostBottom>{userId}</PostBottom>
+      <PostBottom>{name}</PostBottom>
     </Block>
   );
-};
+});
 
 export default Post;
