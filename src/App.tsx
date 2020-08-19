@@ -54,16 +54,15 @@ function App() {
   const [posts, setPosts] = React.useState<Array<Posts>>([]);
   const [users, setUsers] = React.useState<Array<Users>>([]);
   const [filteredPosts, setFilteredPosts] = React.useState<Array<Posts>>([]);
-  const [mergedArrays, setMergedArrays] = React.useState([]);
   const [search, setSearch] = React.useState<String>("");
-
-  console.log(mergedArrays);
 
   React.useEffect(() => {
     axios
       .get("https://jsonplaceholder.typicode.com/users")
       .then((res) => {
-        setUsers(res.data);
+        setUsers(
+          res.data.reduce((acc: any, it: any) => ((acc[it.id] = it), acc), {})
+        );
       })
       .catch((err) => {
         console.log(err);
@@ -90,16 +89,12 @@ function App() {
   }, [search, posts]);
 
   // Костыльное решение, не придумал как лучше замёрджить два массива
-  const result = React.useMemo(() => {
-    merge(posts, users);
-  }, [posts, users]);
+  const result = React.useMemo(() => merge(posts, users), [posts, users]);
 
   function merge(posts: any, users: any) {
     if (posts.length !== 0 && users.length !== 0)
-      setMergedArrays(
-        posts.map(
-          (post: any) => ((post.name = users[post.userId - 1].name), post)
-        )
+      setFilteredPosts(
+        posts.map((post: any) => ((post.name = users[post.userId].name), post))
       );
   }
 
@@ -116,9 +111,7 @@ function App() {
       </SearchBlock>
       <Content>
         {filteredPosts.length ? (
-          filteredPosts.map((post: Posts) => (
-            <Post key={post.id} {...post} {...result} />
-          ))
+          filteredPosts.map((post: Posts) => <Post key={post.id} {...post} />)
         ) : (
           <ErrorTitle>Поста по вашему запросу не найдено</ErrorTitle>
         )}

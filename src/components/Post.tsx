@@ -46,7 +46,6 @@ const PostBottom = styled.div`
 `;
 
 const Post = React.memo(function Post({ title, body, name }: Posts) {
-  console.log(name);
   return (
     <Block>
       <Title>Title</Title>
