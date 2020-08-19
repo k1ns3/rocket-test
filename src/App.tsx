@@ -91,7 +91,7 @@ function App() {
   // Костыльное решение, не придумал как лучше замёрджить два массива
   const result = React.useMemo(() => merge(posts, users), [posts, users]);
 
-  function merge(posts: any, users: any) {
+  function merge(posts: any, users: any): void {
     if (posts.length !== 0 && users.length !== 0)
       setFilteredPosts(
         posts.map((post: any) => ((post.name = users[post.userId].name), post))
