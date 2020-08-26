@@ -89,12 +89,13 @@ function App() {
   }, [search, posts]);
 
   // Костыльное решение, не придумал как лучше замёрджить два массива
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const result = React.useMemo(() => merge(posts, users), [posts, users]);
 
   function merge(posts: any, users: any): void {
     if (posts.length !== 0 && users.length !== 0)
       setFilteredPosts(
-        posts.map((post: any) => ((post.name = users[post.userId].name), post))
+        posts.map((post: any) => (post.name = users[post.userId].name))
       );
   }
 
